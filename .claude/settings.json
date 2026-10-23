@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run context)",
+      "Bash(npm run context:*)",
+      "Bash(npm run daily)",
+      "Bash(npm run daily:*)",
+      "Bash(npm run publish -- --review:*)",
+      "Bash(npm run snap:*)",
+      "Bash(npm run poses)",
+      "Bash(npm run tts:test)",
+      "Read(./**)",
+      "Write(./episodes/**)",
+      "Edit(./episodes/**)",
+      "WebSearch",
+      "WebFetch",
+      "Bash(npm run panel:prep)",
+      "Bash(npm run panel:prep:*)",
+      "Bash(npm run panel:score)",
+      "Bash(npm run panel:score:*)",
+      "Bash(npm run panel:finalize)",
+      "Bash(npm run panel:finalize:*)",
+      "Write(./out/*/panel/**)",
+      "Agent"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Edit(./.env)",
+      "Write(./.env)",
+      "Bash(cat .env*)",
+      "Bash(type .env*)",
+      "Bash(git push:*)",
+      "Read(./node_modules/**)",
+      "Read(./build/**)"
+    ]
+  }
+}

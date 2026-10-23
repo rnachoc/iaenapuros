@@ -1,0 +1,27 @@
+{
+  "dias": {
+    "2026-10-23": {
+      "titulo": "Claude, ¿de verdad te has leído el PDF entero?",
+      "serie": "dia-a-dia",
+      "rondas": 2,
+      "puntuacion": 7.7,
+      "retencion": 87.4,
+      "gancho": 6,
+      "fallos": {
+        "chiste_previsible": 4,
+        "texto_dificil": 4,
+        "gancho_lento": 3,
+        "visual_estatico": 3,
+        "ritmo_lento": 5,
+        "remate_flojo": 3,
+        "titulo_flojo": 2,
+        "otro": 3
+      },
+      "mejores_momentos": [
+        "lucia (28s): 'El PDF tiene 40 páginas' y la confianza cae del 100% al 3%: giro clarísimo y compartible.",
+        "javi (28s): El giro de las 40 páginas recoloca todo: confianza del 100% al 3% de golpe y '¡PILLADA!' con 'las otras 860 eran rarísimas'.",
+        "marta (30s): 'El PDF tiene 40 páginas' + 'las otras 860 eran rarísimas': remate muy gracioso y reconocible."
+      ]
+    }
+  }
+}

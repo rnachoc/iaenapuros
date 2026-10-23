@@ -1,0 +1,21 @@
+# credenciales
+.env
+.env.*
+!.env.example
+# dependencias y entornos
+node_modules/
+.venv/
+.venv-tts/
+__pycache__/
+# generados
+build/
+engine/dist/
+out/
+.hyperframes/
+*.log
+# grabación personal de voz (no se sube)
+brand/voz-tu.*
+brand/voz-provisional.*
+models/
+# skills de terceros (se restauran con: npx skills experimental_install)
+.claude/skills/

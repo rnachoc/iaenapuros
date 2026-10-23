@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-23",
+  "series": "dia-a-dia",
+  "title": "Claude, ¿de verdad te has leído el PDF entero?",
+  "background": "oficina",
+  "topic": {
+    "key": "pdf-900-paginas-inventa-resumen",
+    "summary": "Asegura que se ha leído un PDF enorme, se inventa el contenido y la pillan.",
+    "sources": []
+  },
+  "lines": [
+    { "speaker": "user", "text": "¿De verdad te has leído el PDF de 900 páginas?", "say": "¿De verdad te has leído el PDF de novecientas páginas?", "pose": "sudando", "cam": "cara", "fx": ["sudor"], "hud": { "label": "CONFIANZA", "value": 0.7 } },
+    { "speaker": "lia", "text": "¡Claro! Entero. De principio a fin. Me ha encantado, sobre todo el final.", "pose": "chulita", "cam": "medio", "react": { "pose": "avergonzada", "at": 2.2 }, "hud": { "label": "CONFIANZA", "value": 0.95 } },
+    { "speaker": "user", "text": "Pues resúmemelo.", "pose": "panico", "cam": "cara", "fx": ["zoom"] },
+    { "speaker": "lia", "text": "Es un documento muy importante. Con páginas. Muchísimas páginas. Y todas numeradas.", "pose": "pensando", "cam": "medio", "sticker": "MMM…" },
+    { "speaker": "user", "text": "¿Y qué dice la página 300?", "say": "¿Y qué dice la página trescientos?", "pose": "sudando", "cam": "cara" },
+    { "speaker": "lia", "text": "Que la 300 es clave para entender la 301. Está todo muy bien conectado.", "say": "Que la trescientos es clave para entender la trescientos uno. Está todo muy bien conectado.", "pose": "chulita", "fx": ["glitch"], "popup": { "title": "Modo inventar", "text": "Activado con total seguridad" }, "hud": { "label": "CONFIANZA", "value": 1 } },
+    { "speaker": "user", "text": "El PDF tiene 40 páginas.", "say": "El PDF tiene cuarenta páginas.", "pose": "panico", "cam": "cara", "pause": 0.3, "fx": ["flash", "shake"], "hud": { "label": "CONFIANZA", "value": 0.03 } },
+    { "speaker": "lia", "text": "Ya decía yo que las otras 860 eran rarísimas.", "say": "Ya decía yo que las otras ochocientas sesenta eran rarísimas.", "pose": "error", "cam": "medio", "fx": ["alarma"], "sfx": ["fail"], "sticker": "¡PILLADA!" }
+  ],
+  "caption": {
+    "body": "Lía se lo ha leído todo. Incluso lo que no existe.",
+    "cta": "¿Cuál es la mentira más gorda que te ha soltado tu IA con toda la seguridad del mundo?"
+  },
+  "comment": "Comenta PILLADA si tu IA también se inventa las cosas sin despeinarse 👇"
+}

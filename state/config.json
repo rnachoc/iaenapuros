@@ -1,0 +1,36 @@
+{
+  "publish": {
+    "mode": "dry-run",
+    "graphVersion": "v26.0"
+  },
+  "schedule": {
+    "time": "19:30",
+    "timezone": "Europe/Madrid"
+  },
+  "voices": {
+    "lia": {
+      "voice": "es-ES-ElviraNeural",
+      "rate": "+8%",
+      "pitch": "+0Hz"
+    },
+    "user": {
+      "engine": "chatterbox",
+      "refs": [
+        "brand/referencia-tu.wav",
+        "brand/voz-provisional.wav"
+      ],
+      "exaggeration": 0.5,
+      "cfg": 0.5,
+      "fallback": {
+        "voice": "es-ES-AlvaroNeural",
+        "rate": "+4%",
+        "pitch": "+0Hz"
+      }
+    },
+    "narrador": {
+      "voice": "es-ES-XimenaNeural",
+      "rate": "+6%",
+      "pitch": "+0Hz"
+    }
+  }
+}

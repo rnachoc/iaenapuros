@@ -1,0 +1,41 @@
+{
+  "episodes": [
+    {
+      "date": "2026-10-23",
+      "attempts": 1,
+      "status": "dry-run",
+      "series": "dia-a-dia",
+      "title": "Claude, ¿de verdad te has leído el PDF entero?",
+      "topicKey": "pdf-900-paginas-inventa-resumen",
+      "summary": "Le piden resumir un PDF enorme y se le llena la ventana de contexto.",
+      "sources": [],
+      "updatedAt": "2026-10-23T16:52:42.157Z",
+      "error": null,
+      "qa": {
+        "duration": 31.3,
+        "lufs": -15.2,
+        "tts": "edge",
+        "renderSecs": 187
+      },
+      "files": {
+        "mp4": "out/2026-10-23/reel.mp4",
+        "contact": "out/2026-10-23/qa/contact.jpg",
+        "tiktok": "out/tiktok/2026-10-23_iaenapuros.mp4"
+      },
+      "publish": {
+        "mode": "dry-run",
+        "at": "2026-10-23T10:39:33.580Z",
+        "review": "ok: subtítulos legibles, Lía visible, remate claro"
+      },
+      "panel": {
+        "ronda": 2,
+        "rondas": 2,
+        "puntuacion": 7.7,
+        "aprobado": true,
+        "completos": 4,
+        "gancho": 6,
+        "reglas_activas": []
+      }
+    }
+  ]
+}
