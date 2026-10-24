@@ -17,7 +17,10 @@
     "panel:prep": "node scripts/panel.mjs prep",
     "panel:score": "node scripts/panel.mjs score",
     "panel:finalize": "node scripts/panel.mjs finalize",
-    "publish:check": "node scripts/publish.mjs --check"
+    "publish:check": "node scripts/publish.mjs --check",
+    "tiktok:setup": "node scripts/tiktok-setup.mjs",
+    "tiktok:draft": "node scripts/tiktok-draft.mjs",
+    "ig:test": "node scripts/ig-test.mjs"
   },
   "type": "module",
   "devDependencies": {

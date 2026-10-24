@@ -2,19 +2,25 @@
 
 Todo lo demás ya funciona solo: entorno, motor, Lía, voz, QA, pie, copia para TikTok, dry-run y tarea programada.
 
-## 0. Publicación automática en Instagram + TikTok con PostEverywhere (≈10 min)
-Es la vía por defecto (`publish.provider: "posteverywhere"`). Publica con sus propias apps ya aprobadas por Meta y TikTok, así que evita el error de vídeo de la API de Meta y la revisión de apps de TikTok. Es de pago: el plan Lite cuesta 9 $/mes por 2 cuentas, y la prueba de 7 días pide tarjeta.
-1. Crea la cuenta en https://posteverywhere.ai y elige el plan Lite.
-2. En *Accounts*, conecta **Instagram** (cuenta profesional) y **TikTok** (@iaenapuros) e inicia sesión en cada una cuando lo pida.
-3. En https://app.posteverywhere.ai/developers crea una **API key**.
-4. En `.env`, añade la línea `POSTEVERYWHERE_API_KEY=<tu clave>`. Copia el formato de `.env.example`.
-5. Comprueba que todo está bien, sin publicar nada:
-   ```bash
-   npm run publish:check
+## 0. TikTok: subida automática a borradores (gratis, ≈15 min una vez)
+Cada día el reel llega solo a tu bandeja de TikTok como borrador y tú lo publicas con un toque. TikTok no permite publicar en público de forma automática y gratuita desde herramientas personales: sin auditoría, solo publica vídeos privados, y la auditoría rechaza este tipo de herramienta.
+1. Entra en https://developers.tiktok.com con tu cuenta de TikTok → *Manage apps* → *Connect an app*. Nombre: «iaenapuros-uploader», plataforma **Desktop**.
+2. Añade los productos **Login Kit** y **Content Posting API**. En Content Posting API, usa solo la opción de subida (*Upload*), no *Direct Post*. Permisos: `user.info.basic` y `video.upload`.
+3. En Login Kit → *Redirect URI* (Desktop), añade exactamente `http://127.0.0.1:3455/callback/`.
+4. Pasa a **Sandbox** (arriba), crea un sandbox y en *Target users* añade tu cuenta @iaenapuros.
+5. Copia el *Client key* y el *Client secret* del sandbox a `.env` con este formato:
    ```
-   Tiene que responder `"ok": true` con una cuenta de Instagram y otra de TikTok.
+   TIKTOK_CLIENT_KEY=...
+   TIKTOK_CLIENT_SECRET=...
+   ```
+6. Ejecuta lo siguiente, inicia sesión con @iaenapuros y acepta los permisos:
+   ```bash
+   npm run tiktok:setup
+   ```
+   Tiene que responder `OK: TikTok conectado`. A partir de ahí la renovación es automática durante 365 días.
+7. **Cada día:** te llega la notificación del borrador a TikTok. Ábrela, pega el pie de `out/tiktok/AAAA-MM-DD_iaenapuros_pie.txt` o de `para-publicar/` y pulsa *Publicar*.
 
-Mientras no haya clave, la publicación en modo live sigue usando la vía de Meta (pasos 1-3), solo para Instagram.
+Si el sandbox no deja subir borradores (lo sabremos en la primera subida), la alternativa es seguir subiéndolo a mano con el paquete de `out/tiktok/`.
 
 ## 1. Cuenta profesional de Instagram vinculada a una Página de Facebook (≈5 min)
 Es necesario porque solo la vía de Facebook Login permite subir el vídeo desde el PC.
@@ -51,7 +57,7 @@ Cuando hayas visto un par de dry-runs y estés conforme, escribe en Claude Code:
 
 ## Cada día (opcional, 1 min)
 - **Fijar el comentario:** la API no permite fijarlo. En el reel, mantén pulsado el comentario de @iaenapuros → *Fijar*.
-- **TikTok:** con PostEverywhere se publica solo. Sin él, el vídeo y su pie están en `out/tiktok/AAAA-MM-DD_iaenapuros.mp4` y `…_pie.txt`, listos para subirlos a mano.
+- **TikTok:** el borrador llega solo (paso 0); publícalo desde la app pegando el pie de `out/tiktok/AAAA-MM-DD_iaenapuros_pie.txt`.
 - **Revisión:** el historial está en `state/log.json` y la hoja de fotogramas de cada día en `out/<fecha>/qa/contact.jpg`.
 
 ## Si algo falla

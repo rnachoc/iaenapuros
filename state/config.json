@@ -3,7 +3,7 @@
     "mode": "live",
     "graphVersion": "v26.0",
     "changedAt": "2026-10-24T12:30:58.834Z",
-    "provider": "posteverywhere",
+    "provider": "meta",
     "platforms": [
       "instagram",
       "tiktok"
