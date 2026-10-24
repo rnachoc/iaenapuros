@@ -1,19 +1,126 @@
-// Publicación del reel en Instagram (API oficial, subida reanudable desde archivo local).
+// Publicación del reel. Dos vías (state/config.json → publish.provider):
+//   "posteverywhere" (por defecto): Instagram Reels + TikTok a la vez vía la API de PostEverywhere
+//   "meta": solo Instagram, directo con la Graph API (subida reanudable desde archivo local)
 // Uso: node scripts/publish.mjs [--date D] [--dry-run] [--review "nota"]
 //      node scripts/publish.mjs --set-mode live|dry-run
+//      node scripts/publish.mjs --check          (comprueba plan y cuentas sin publicar nada)
 import fs from 'node:fs';
 import path from 'node:path';
-import { arg, todayMadrid, outDir, readJSON, writeJSON, config, CONFIG_FILE, readLog, upsertLog, loadEnv } from './lib/common.mjs';
+import { arg, todayMadrid, outDir, readJSON, writeJSON, config, CONFIG_FILE, readLog, upsertLog, loadEnv, durationOf } from './lib/common.mjs';
+import { pe, peKey, pickAccounts } from './lib/posteverywhere.mjs';
 import { graph, ensureToken, graphVersion } from './lib/meta.mjs';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// ---------- PostEverywhere: Instagram Reels + TikTok ----------
+function tiktokCaption(date, caption) {
+  const f = path.join(path.dirname(outDir(date)), 'tiktok', `${date}_iaenapuros_pie.txt`);
+  return (fs.existsSync(f) ? fs.readFileSync(f, 'utf8').trim() : caption).slice(0, 2200);
+}
+
+function postBody(date, caption, mediaId, accounts) {
+  return {
+    content: caption,
+    account_ids: accounts.map((a) => a.id),
+    media_ids: [mediaId],
+    timezone: 'Europe/Madrid',
+    platform_content: {
+      instagram: { contentType: 'Reels' },
+      tiktok: {
+        content: tiktokCaption(date, caption),
+        settings: { privacyLevel: 'PUBLIC_TO_EVERYONE', isAIGC: true, disableComment: false, disableDuet: false, disableStitch: false, videoCoverTimestamp: 0 },
+      },
+    },
+  };
+}
+
+async function publishPE({ date, out, mp4, caption, comment, mode, review, entry }) {
+  const platforms = (config().publish || {}).platforms || ['instagram', 'tiktok'];
+  if (mode === 'dry-run') {
+    const plan = {
+      mode,
+      provider: 'posteverywhere',
+      date,
+      platforms,
+      steps: [
+        'POST /api/v1/media/upload {video/mp4} → PUT de los bytes a upload_url → POST /media/{id}/complete → GET /media/{id} hasta "ready"',
+        'POST /api/v1/posts {content, account_ids, media_ids, platform_content: instagram Reels + tiktok (público, etiqueta IA)}',
+        'GET /api/v1/posts/{id}/results hasta que cada destino quede published/failed',
+      ],
+      body: postBody(date, caption, '<media_id>', platforms.map((p) => ({ id: `<${p}>`, platform: p }))),
+      comment_manual: comment,
+      review: review || null,
+    };
+    // con clave, se comprueba de verdad la conexión (solo lecturas: no publica nada)
+    if (peKey()) {
+      try {
+        const { picked, problems } = await pickAccounts(platforms);
+        plan.cuentas = picked;
+        plan.problemas = problems;
+      } catch (e) {
+        plan.problemas = [e.message];
+      }
+    } else plan.problemas = ['falta POSTEVERYWHERE_API_KEY en .env'];
+    writeJSON(path.join(out, 'publish.json'), plan);
+    upsertLog(date, { status: 'dry-run', publish: { mode, provider: 'posteverywhere', at: new Date().toISOString(), review: review || null, problemas: plan.problemas } });
+    return { ok: true, mode, plan: path.join(out, 'publish.json'), problemas: plan.problemas };
+  }
+
+  // idempotente: si el post ya se creó (p. ej. se cortó la espera), solo se reintenta y se espera
+  let postId = entry.publish && entry.publish.pePostId;
+  if (!postId) {
+    const { picked, problems } = await pickAccounts(platforms);
+    if (!picked.length) throw new Error('Ninguna cuenta puede publicar: ' + problems.join('; '));
+    const mediaId = await pe.uploadVideo(mp4, { width: 1080, height: 1920, duration: Math.round(durationOf(mp4)), platforms });
+    const created = await pe.createPost(postBody(date, caption, mediaId, picked));
+    postId = created.post_id;
+    upsertLog(date, { status: 'publishing', publish: { mode, provider: 'posteverywhere', pePostId: postId, cuentas: picked, problemas: problems, at: new Date().toISOString() } });
+  } else {
+    const prev = await pe.results(postId);
+    if ((prev.results || []).some((d) => d.status === 'failed')) await pe.retry(postId);
+  }
+
+  const res = await pe.waitResults(postId);
+  const dest = (res.results || []).map((d) => ({ platform: d.platform, status: d.status, url: d.platform_post_url, error: d.error }));
+  const okList = dest.filter((d) => d.status === 'published');
+  const record = {
+    mode,
+    provider: 'posteverywhere',
+    pePostId: postId,
+    destinos: dest,
+    permalink: (okList.find((d) => d.platform === 'instagram') || okList[0] || {}).url || null,
+    comment_manual: comment,
+    at: new Date().toISOString(),
+    review: review || null,
+  };
+  writeJSON(path.join(out, 'publish.json'), record);
+  const allOk = dest.length > 0 && okList.length === dest.length;
+  upsertLog(date, { status: allOk ? 'published' : okList.length ? 'partially_published' : 'publish_failed', publish: record });
+  if (!allOk)
+    return { ok: false, ...record, error: 'destinos sin publicar: ' + dest.filter((d) => d.status !== 'published').map((d) => `${d.platform} (${d.status})`).join(', ') };
+  return { ok: true, ...record };
+}
+
+export async function check() {
+  const platforms = (config().publish || {}).platforms || ['instagram', 'tiktok'];
+  const me = await pe.me();
+  const { picked, problems } = await pickAccounts(platforms);
+  return {
+    ok: problems.length === 0,
+    plan: me.organization && { plan: me.organization.subscription_plan, estado: me.organization.subscription_status, activo: me.organization.entitled },
+    cuentas: picked,
+    problemas: problems,
+  };
+}
+
+// ---------- Publicación ----------
 export async function publish(date, { dryRun, review } = {}) {
   const out = outDir(date);
   const mp4 = path.join(out, 'reel.mp4');
   const qa = readJSON(path.join(out, 'qa.json'));
   const entry = readLog().episodes.find((e) => e.date === date) || {};
   if (entry.status === 'published') return { ok: true, skipped: 'ya publicado', permalink: entry.publish && entry.publish.permalink };
+  if (entry.status === 'partially_published' && !(entry.publish && entry.publish.pePostId)) return { ok: false, error: 'publicado a medias sin id de PostEverywhere: revisar a mano' };
   if (!qa || !qa.passed) return { ok: false, error: 'QA no superado: no se publica' };
   if (fs.existsSync(path.join(out, 'panel')) && !fs.existsSync(path.join(out, 'panel', 'final.json')))
     return { ok: false, error: 'el jurado no ha cerrado: ejecuta npm run panel:finalize' };
@@ -22,6 +129,9 @@ export async function publish(date, { dryRun, review } = {}) {
   const comment = fs.readFileSync(path.join(out, 'comment.txt'), 'utf8').trim();
   const size = fs.statSync(mp4).size;
   const mode = dryRun || (config().publish || {}).mode !== 'live' ? 'dry-run' : 'live';
+  // sin clave de PostEverywhere se sigue publicando solo en Instagram por Meta, como antes
+  const provider = (config().publish || {}).provider || 'posteverywhere';
+  if (provider === 'posteverywhere' && (peKey() || mode === 'dry-run')) return publishPE({ date, out, mp4, caption, comment, mode, review, entry });
 
   if (mode === 'dry-run') {
     const env = loadEnv();
@@ -97,15 +207,27 @@ if (process.argv[1] && process.argv[1].endsWith('publish.mjs')) {
     console.log('Modo de publicación: ' + setMode);
     process.exit(0);
   }
-  const date = arg('date', todayMadrid());
-  publish(date, { dryRun: !!arg('dry-run'), review: typeof arg('review') === 'string' ? arg('review') : null })
-    .then((r) => {
-      console.log(JSON.stringify(r));
-      process.exit(r.ok ? 0 : 1);
-    })
-    .catch((e) => {
-      upsertLog(date, { status: 'publish_failed', error: e.message });
-      console.log(JSON.stringify({ ok: false, error: e.message }));
-      process.exit(1);
-    });
+  if (arg('check')) {
+    check()
+      .then((r) => {
+        console.log(JSON.stringify(r, null, 1));
+        process.exit(r.ok ? 0 : 1);
+      })
+      .catch((e) => {
+        console.log(JSON.stringify({ ok: false, error: e.message }));
+        process.exit(1);
+      });
+  } else {
+    const date = arg('date', todayMadrid());
+    publish(date, { dryRun: !!arg('dry-run'), review: typeof arg('review') === 'string' ? arg('review') : null })
+      .then((r) => {
+        console.log(JSON.stringify(r));
+        process.exit(r.ok ? 0 : 1);
+      })
+      .catch((e) => {
+        upsertLog(date, { status: 'publish_failed', error: e.message });
+        console.log(JSON.stringify({ ok: false, error: e.message }));
+        process.exit(1);
+      });
+  }
 }

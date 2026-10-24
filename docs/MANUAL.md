@@ -2,6 +2,20 @@
 
 Todo lo demás ya funciona solo: entorno, motor, Lía, voz, QA, pie, copia para TikTok, dry-run y tarea programada.
 
+## 0. Publicación automática en Instagram + TikTok con PostEverywhere (≈10 min)
+Es la vía por defecto (`publish.provider: "posteverywhere"`). Publica con sus propias apps ya aprobadas por Meta y TikTok, así que evita el error de vídeo de la API de Meta y la revisión de apps de TikTok. Es de pago: el plan Lite cuesta 9 $/mes por 2 cuentas, y la prueba de 7 días pide tarjeta.
+1. Crea la cuenta en https://posteverywhere.ai y elige el plan Lite.
+2. En *Accounts*, conecta **Instagram** (cuenta profesional) y **TikTok** (@iaenapuros) e inicia sesión en cada una cuando lo pida.
+3. En https://app.posteverywhere.ai/developers crea una **API key**.
+4. En `.env`, añade la línea `POSTEVERYWHERE_API_KEY=<tu clave>`. Copia el formato de `.env.example`.
+5. Comprueba que todo está bien, sin publicar nada:
+   ```bash
+   npm run publish:check
+   ```
+   Tiene que responder `"ok": true` con una cuenta de Instagram y otra de TikTok.
+
+Mientras no haya clave, la publicación en modo live sigue usando la vía de Meta (pasos 1-3), solo para Instagram.
+
 ## 1. Cuenta profesional de Instagram vinculada a una Página de Facebook (≈5 min)
 Es necesario porque solo la vía de Facebook Login permite subir el vídeo desde el PC.
 1. En la app de Instagram, entra en Perfil → ☰ → *Configuración y privacidad* → *Tipo de cuenta y herramientas* → *Cambiar a cuenta profesional*. Elige **Creador** (o Empresa) y la categoría "Creador digital".
@@ -37,7 +51,7 @@ Cuando hayas visto un par de dry-runs y estés conforme, escribe en Claude Code:
 
 ## Cada día (opcional, 1 min)
 - **Fijar el comentario:** la API no permite fijarlo. En el reel, mantén pulsado el comentario de @iaenapuros → *Fijar*.
-- **TikTok:** el vídeo y su pie están en `out/tiktok/AAAA-MM-DD_iaenapuros.mp4` y `…_pie.txt`. Súbelo a mano desde la app o desde tiktok.com/upload.
+- **TikTok:** con PostEverywhere se publica solo. Sin él, el vídeo y su pie están en `out/tiktok/AAAA-MM-DD_iaenapuros.mp4` y `…_pie.txt`, listos para subirlos a mano.
 - **Revisión:** el historial está en `state/log.json` y la hoja de fotogramas de cada día en `out/<fecha>/qa/contact.jpg`.
 
 ## Si algo falla

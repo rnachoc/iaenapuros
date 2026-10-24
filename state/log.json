@@ -9,7 +9,7 @@
       "topicKey": "pdf-900-paginas-inventa-resumen",
       "summary": "Le piden resumir un PDF enorme y se le llena la ventana de contexto.",
       "sources": [],
-      "updatedAt": "2026-10-23T16:52:42.157Z",
+      "updatedAt": "2026-10-24T23:01:27.939Z",
       "error": null,
       "qa": {
         "duration": 31.3,
@@ -24,8 +24,12 @@
       },
       "publish": {
         "mode": "dry-run",
-        "at": "2026-10-23T10:39:33.580Z",
-        "review": "ok: subtítulos legibles, Lía visible, remate claro"
+        "provider": "posteverywhere",
+        "at": "2026-10-24T23:01:27.938Z",
+        "review": null,
+        "problemas": [
+          "falta POSTEVERYWHERE_API_KEY en .env"
+        ]
       },
       "panel": {
         "ronda": 2,

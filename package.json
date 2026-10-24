@@ -16,7 +16,8 @@
     "publish:mode": "node scripts/publish.mjs --set-mode",
     "panel:prep": "node scripts/panel.mjs prep",
     "panel:score": "node scripts/panel.mjs score",
-    "panel:finalize": "node scripts/panel.mjs finalize"
+    "panel:finalize": "node scripts/panel.mjs finalize",
+    "publish:check": "node scripts/publish.mjs --check"
   },
   "type": "module",
   "devDependencies": {

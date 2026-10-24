@@ -47,14 +47,15 @@ npm run context ─► pick a topic ─► write episodes/<date>/episode.json
 
 ## Publishing
 
-There are two delivery paths, and the daily routine runs both:
+`npm run publish` publishes the reel to **Instagram (Reels) and TikTok in one call** through the [PostEverywhere](https://posteverywhere.ai) API, the same API its official [MCP server](https://github.com/posteverywhere/mcp) wraps. PostEverywhere publishes with its own approved Meta and TikTok apps, so there's no app review and no public video URL needed.
 
-| Path | Command | What it does |
-|---|---|---|
-| Instagram API | `npm run publish` | Uploads the reel through the official Graph API (Facebook Login), waits for processing, publishes it and posts the first comment. Only acts when `state/config.json → publish.mode` is `"live"`; otherwise it writes a dry-run plan. |
-| Manual package | `npm run export` | Copies `reel.mp4`, `portada.jpg` (cover), `descripcion.txt` (caption with hashtags) and `comentario.txt` (comment to pin) to `para-publicar/<date>/`, so you can schedule the post from the Instagram app in a minute. |
+1. `POST /media/upload` returns a short-lived URL; the local MP4 is `PUT` there, confirmed with `/media/{id}/complete`, and polled until `ready`.
+2. `POST /posts` with both accounts. Instagram is posted as a Reel; TikTok is posted public, with the AI-generated label and comments, duets and stitches on.
+3. `/posts/{id}/results` is polled until each destination is `published` or `failed`. The run is idempotent: a re-run retries failed destinations instead of posting twice.
 
-**Known issue (October 2026):** Meta's API currently rejects video uploads for this account (`ProcessingFailedError` / error `2207076`) through every official route tested, while images and manual uploads work. Until Meta fixes it, the manual package is the reliable path. `publish` stays in live mode so publishing resumes on its own once the API recovers.
+It only acts when `state/config.json → publish.mode` is `"live"`; otherwise it writes a dry-run plan (and, if a key is present, checks the connected accounts read-only). `npm run publish:check` verifies the plan and account health without posting. PostEverywhere is a paid service (from $9/month for 2 accounts); set `POSTEVERYWHERE_API_KEY` in `.env`.
+
+Alternatives: `publish.provider: "meta"` posts to Instagram only through the Graph API (Facebook Login, resumable upload). `npm run export` builds a ready-to-post package in `para-publicar/<date>/` for manual posting.
 
 ## Repository layout
 
