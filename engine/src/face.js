@@ -1,10 +1,12 @@
-// Cara de Lía: pantalla LED dibujada en un canvas que se usa como textura.
+// Cara de Claude: pintada sobre el barro en un canvas transparente que se usa como textura.
 import { clamp } from './util.js';
 
 const W = 512;
 const H = 384;
-const INK = '#C9FFF8';
-const GLOW = 'rgba(120,255,235,0.55)';
+const INK = '#2A1610';
+const HOLE = '#7A2A1C';
+const CREAM = '#FFF6EA';
+const CRACK = '#6E2F1C';
 
 export function createFaceCanvas() {
   const c = document.createElement('canvas');
@@ -35,11 +37,14 @@ function eye(g, cx, cy, s, kind, blink, t, side) {
   switch (kind) {
     case 'wide': {
       g.beginPath();
+      g.fillStyle = CREAM;
       g.ellipse(0, 0, 50 * s, 58 * s * Math.max(0.12, open), 0, 0, Math.PI * 2);
       g.fill();
-      g.fillStyle = '#0B0D1F';
+      g.lineWidth = 7;
+      g.stroke();
+      g.fillStyle = INK;
       g.beginPath();
-      g.arc(0, 4, 13 * s, 0, Math.PI * 2);
+      g.arc(0, 4, 16 * s, 0, Math.PI * 2);
       g.fill();
       break;
     }
@@ -66,7 +71,7 @@ function eye(g, cx, cy, s, kind, blink, t, side) {
       rr(g, -28, -h / 2, 56, h, 26);
       g.fill();
       // párpado inclinado (cejas tristes)
-      g.fillStyle = '#0B0D1F';
+      g.fillStyle = '#C96442';
       g.beginPath();
       const dir = side < 0 ? 1 : -1;
       g.moveTo(-40, -60);
@@ -140,7 +145,7 @@ function mouth(g, kind, open, t) {
     const h = 14 + open * (kind === 'scream' ? 92 : 64);
     rr(g, -w / 2, -h / 2 + 4, w, h, Math.min(30, h / 2));
     g.fill();
-    g.fillStyle = '#0B0D1F';
+    g.fillStyle = HOLE;
     rr(g, -w / 2 + 12, -h / 2 + 4 + 11, w - 24, Math.max(0, h - 22), Math.min(22, h / 2));
     if (h > 30) g.fill();
     g.restore();
@@ -177,7 +182,7 @@ function mouth(g, kind, open, t) {
     case 'grimace': {
       rr(g, -70, -20, 140, 50, 14);
       g.fill();
-      g.fillStyle = '#0B0D1F';
+      g.fillStyle = CREAM;
       for (let i = -2; i <= 2; i++) g.fillRect(i * 26 - 3, -16, 6, 42);
       g.fillRect(-64, 3, 128, 5);
       break;
@@ -186,7 +191,7 @@ function mouth(g, kind, open, t) {
       g.beginPath();
       g.ellipse(0, 10, 46, 52, 0, 0, Math.PI * 2);
       g.fill();
-      g.fillStyle = '#0B0D1F';
+      g.fillStyle = HOLE;
       g.beginPath();
       g.ellipse(0, 12, 32, 38, 0, 0, Math.PI * 2);
       g.fill();
@@ -216,32 +221,44 @@ function mouth(g, kind, open, t) {
 
 /**
  * Dibuja la cara.
- * st: { eyes, mouth, open, blink, brows, blush, lookX, lookY, glitch }
+ * st: { eyes, mouth, open, blink, brows, blush, lookX, lookY, glitch, crack }
  */
 export function drawFace(canvas, st, t) {
   const g = canvas.getContext('2d');
   g.setTransform(1, 0, 0, 1, 0, 0);
   g.clearRect(0, 0, W, H);
-  // fondo de pantalla
-  const bg = g.createLinearGradient(0, 0, 0, H);
-  bg.addColorStop(0, '#11163A');
-  bg.addColorStop(1, '#070918');
-  g.fillStyle = bg;
-  g.fillRect(0, 0, W, H);
-  // líneas de escaneo
-  g.fillStyle = 'rgba(255,255,255,0.035)';
-  for (let y = 0; y < H; y += 6) g.fillRect(0, y, W, 2);
+  // grietas del barro cuando el estrés aprieta
+  if (st.crack > 0.02) {
+    g.save();
+    g.strokeStyle = CRACK;
+    g.lineWidth = 5;
+    g.lineCap = 'round';
+    g.globalAlpha = Math.min(1, st.crack * 1.4);
+    const cracks = [
+      [[470, 20], [440, 60], [455, 95], [420, 140]],
+      [[30, 330], [70, 300], [60, 270], [100, 240]],
+      [[500, 260], [470, 290], [480, 330]],
+    ];
+    cracks.slice(0, 1 + Math.floor(st.crack * 2.9)).forEach((c) => {
+      g.beginPath();
+      c.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y)));
+      g.stroke();
+    });
+    g.restore();
+  }
 
   const lx = clamp(st.lookX, -1, 1) * 22;
   const ly = -clamp(st.lookY, -1, 1) * 16;
 
   g.save();
+  // rasgos un 25 % más grandes: sobre el barro tienen que leerse en el móvil
+  g.translate(W / 2, H / 2);
+  g.scale(1.25, 1.25);
+  g.translate(-W / 2, -H / 2);
   if (st.glitch > 0) {
     const off = Math.round(Math.sin(t * 97) * 18 * st.glitch);
     g.translate(off, 0);
   }
-  g.shadowColor = GLOW;
-  g.shadowBlur = 22;
 
   // cejas (solo si hay emoción marcada y ojos normales)
   if (Math.abs(st.brows) > 0.15 && (st.eyes === 'normal' || st.eyes === 'wide')) {

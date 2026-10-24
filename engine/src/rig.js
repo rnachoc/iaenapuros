@@ -1,23 +1,22 @@
-// Rig 3D de Lía: robot de bloques con pantalla-cara y antena de "contexto".
+// Rig 3D de Claude (parodia): muñeco de barro terracota con cara pintada y chispa de "contexto".
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { createFaceCanvas, drawFace } from './face.js';
 import { noise1, clamp, lerp } from './util.js';
 
 export const PALETTE = {
-  body: '#2EC4B6',
-  bodyDark: '#1F9E92',
-  joint: '#15706A',
-  accent: '#FFD23F',
-  dark: '#1B1E3A',
-  bezel: '#232849',
+  body: '#C96442',
+  bodyDark: '#A9532F',
+  joint: '#8E4527',
+  accent: '#F3E9DC',
+  dark: '#3A2620',
   sweat: '#9EE7FF',
 };
 
 const mats = {};
 function mat(color, extra = {}) {
   const key = color + JSON.stringify(extra);
-  if (!mats[key]) mats[key] = new THREE.MeshStandardMaterial({ color, roughness: 0.5, metalness: 0.04, ...extra });
+  if (!mats[key]) mats[key] = new THREE.MeshStandardMaterial({ color, roughness: 0.82, metalness: 0, ...extra });
   return mats[key];
 }
 
@@ -73,23 +72,13 @@ export function createLia() {
 
   const torso = new THREE.Group();
   hips.add(torso);
-  const chest = block(2.15, 1.95, 1.45, PALETTE.body, 0.22);
+  const chest = block(2.1, 2.0, 1.6, PALETTE.body, 0.42);
   chest.position.y = 0.98;
   torso.add(chest);
-  const belt = block(2.2, 0.3, 1.5, PALETTE.dark, 0.1);
-  belt.position.y = 0.16;
-  torso.add(belt);
-  const panel = block(1.05, 0.62, 0.12, PALETTE.dark, 0.06);
-  panel.position.set(0, 1.12, 0.74);
-  torso.add(panel);
-  const ledMat = new THREE.MeshBasicMaterial({ color: '#FFD23F', toneMapped: false });
-  const leds = [];
-  for (let i = 0; i < 3; i++) {
-    const led = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 0.06), ledMat.clone());
-    led.position.set(-0.3 + i * 0.3, 1.12, 0.82);
-    torso.add(led);
-    leds.push(led);
-  }
+  // barriga crema, como un pegote de arcilla más clara
+  const belly = block(1.2, 1.1, 0.2, PALETTE.accent, 0.1);
+  belly.position.set(0, 0.9, 0.76);
+  torso.add(belly);
 
   const armL = makeArm(-1);
   armL.position.set(-1.32, 1.68, 0);
@@ -105,12 +94,9 @@ export function createLia() {
   const head = new THREE.Group();
   head.position.y = 2.12;
   torso.add(head);
-  const skull = block(3.0, 2.5, 2.4, PALETTE.body, 0.32);
+  const skull = block(3.0, 2.5, 2.4, PALETTE.body, 0.6);
   skull.position.y = 1.25;
   head.add(skull);
-  const bezel = block(2.62, 2.0, 0.2, PALETTE.bezel, 0.16);
-  bezel.position.set(0, 1.2, 1.15);
-  head.add(bezel);
 
   const faceCanvas = createFaceCanvas();
   const faceTex = new THREE.CanvasTexture(faceCanvas);
@@ -118,22 +104,28 @@ export function createLia() {
   faceTex.anisotropy = 4;
   const face = new THREE.Mesh(
     new THREE.PlaneGeometry(2.4, 1.8),
-    new THREE.MeshBasicMaterial({ map: faceTex, toneMapped: false })
+    new THREE.MeshBasicMaterial({ map: faceTex, toneMapped: false, transparent: true })
   );
-  face.position.set(0, 1.2, 1.262);
+  face.position.set(0, 1.2, 1.205);
   head.add(face);
 
-  for (const side of [-1, 1]) {
-    const ear = block(0.36, 1.0, 1.0, PALETTE.accent, 0.12);
-    ear.position.set(side * 1.62, 1.2, 0);
-    head.add(ear);
-  }
-  const stalk = block(0.26, 0.8, 0.26, PALETTE.bodyDark, 0.06);
-  stalk.position.y = 2.82;
+  const stalk = block(0.22, 0.6, 0.22, PALETTE.bodyDark, 0.08);
+  stalk.position.y = 2.72;
   head.add(stalk);
+  // chispa de 4 puntas (propia, no el logo de Anthropic) = barra de contexto
+  const star = new THREE.Shape();
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2 + Math.PI / 2;
+    const r = i % 2 ? 0.13 : 0.42;
+    if (i === 0) star.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+    else star.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+  }
+  star.closePath();
+  const sparkGeo = new THREE.ExtrudeGeometry(star, { depth: 0.12, bevelEnabled: true, bevelThickness: 0.04, bevelSize: 0.04, bevelSegments: 2 });
+  sparkGeo.center();
   const bulbMat = new THREE.MeshStandardMaterial({ color: '#5BE37D', emissive: '#5BE37D', emissiveIntensity: 1.2, roughness: 0.3 });
-  const bulb = new THREE.Mesh(new RoundedBoxGeometry(0.46, 0.46, 0.46, 2, 0.1), bulbMat);
-  bulb.position.y = 3.32;
+  const bulb = new THREE.Mesh(sparkGeo, bulbMat);
+  bulb.position.y = 3.3;
   head.add(bulb);
 
   // gotas de sudor
@@ -197,11 +189,6 @@ export function createLia() {
     bulbMat.emissiveIntensity = s > 0.8 ? 0.6 + 1.4 * (Math.sin(t * 25) > 0 ? 1 : 0.2) : 1.2;
     bulb.rotation.y = t * 0.8;
 
-    leds.forEach((l, i) => {
-      const on = Math.sin(t * (3 + i) + i * 2) > -0.2;
-      l.material.color.set(on ? (s > 0.7 ? '#FF4D5E' : '#FFD23F') : '#3A3420');
-    });
-
     // sudor
     drops.forEach((d, i) => {
       const period = 1.1;
@@ -224,6 +211,7 @@ export function createLia() {
         lookX: p.lookX,
         lookY: p.lookY,
         glitch: x.glitch,
+        crack: clamp((s - 0.6) / 0.4),
       },
       t
     );

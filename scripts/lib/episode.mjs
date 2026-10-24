@@ -3,7 +3,7 @@ import { POSE_NAMES } from '../../engine/src/poses.js';
 import { SFX } from '../sfx.mjs';
 
 export const SPEAKERS = ['lia', 'user', 'narrador'];
-export const BACKGROUNDS = ['oficina', 'servidor', 'plato'];
+export const BACKGROUNDS = ['terminal', 'oficina', 'servidor', 'plato'];
 export const CAMS = ['general', 'medio', 'cara'];
 export const FX = ['shake', 'zoom', 'alarma', 'flash', 'glitch', 'humo', 'confeti', 'sudor'];
 export const SFX_NAMES = Object.keys(SFX);

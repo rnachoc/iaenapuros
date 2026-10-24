@@ -55,7 +55,7 @@ export function buildProject(ep, tl, audioWav, dir) {
     title: ep.title,
     series: ep.series,
     seriesLabel: SERIES[ep.series],
-    background: ep.background || (ep.series === 'actualidad' ? 'plato' : 'oficina'),
+    background: ep.background || (ep.series === 'actualidad' ? 'plato' : 'terminal'),
     duration: tl.duration,
     seed: [...ep.date].reduce((a, c) => a * 31 + c.charCodeAt(0), 7) >>> 0,
     source: src ? `${src.name} · ${fmtDate(src.date)}` : null,

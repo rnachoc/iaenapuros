@@ -1,4 +1,4 @@
-// Fondos 3D de bloques: oficina, servidor (CPD) y plato (informativo).
+// Fondos 3D de bloques: terminal, oficina, servidor (CPD) y plato (informativo).
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { mulberry32, hash } from './util.js';
@@ -169,6 +169,93 @@ function oficina() {
   };
 }
 
+// ---------- TERMINAL (fondo oscuro con consolas flotantes) ----------
+function terminal() {
+  const g = new THREE.Group();
+  g.add(floor(floorTex('#0F1124', '#0D0F20', '#1B1F3D')));
+  g.add(box(60, 30, 0.6, '#080A16', 0, 15, -13, 0));
+
+  const LOG = [
+    ['#8E7CFF', '> leyendo 38 archivos del repo…'],
+    ['#C9D1FF', '  src/app.ts · src/api/user.ts · tests/'],
+    ['#5BE37D', '✓ 112 tests pasados'],
+    ['#FFB547', '! contexto al 87 %'],
+    ['#C9D1FF', '$ git push origin main'],
+    ['#8E7CFF', '> generando notas de versión'],
+    ['#C9D1FF', '  feat: modo oscuro en ajustes'],
+    ['#5BE37D', '✓ aprobado con cambios'],
+    ['#FF5A5F', '✗ 2 tests fallando: auth.spec'],
+    ['#C9D1FF', '> petición: "hazlo más profesional"'],
+    ['#8E7CFF', '> pensando…'],
+    ['#C9D1FF', '  refactor: 14 archivos modificados'],
+    ['#5BE37D', '✓ compilado en 3,2 s'],
+    ['#FFB547', '! límite de uso cerca'],
+  ];
+  // [ancho, alto, x, y, z, desfase]
+  const layout = [
+    [9.0, 6.0, -6.8, 7.0, -7.5, 0],
+    [8.0, 5.6, 7.2, 8.0, -8.0, 5],
+    [7.0, 4.6, -6.6, 2.4, -5.5, 9],
+    [7.0, 4.6, 7.0, 2.6, -6.0, 3],
+    [10.0, 4.6, 0.0, 12.5, -9.0, 7],
+  ];
+  const panels = layout.map(([w, h, x, y, z, off]) => {
+    const cv = canvasTex(512, Math.round((512 * h) / w), () => {});
+    const m = new THREE.Mesh(
+      new THREE.PlaneGeometry(w, h),
+      new THREE.MeshBasicMaterial({ map: cv.tex, toneMapped: false, transparent: true, opacity: 0.95, fog: true })
+    );
+    m.position.set(x, y, z);
+    g.add(m);
+    return { cv, off };
+  });
+
+  const glow = new THREE.PointLight('#8E7CFF', 40, 30, 1.3);
+  glow.position.set(-4, 9, -6);
+  g.add(glow);
+  const warm = new THREE.PointLight('#FF9A6B', 16, 16, 1.5);
+  warm.position.set(5, 6, 3);
+  g.add(warm);
+
+  return {
+    group: g,
+    fog: ['#0A0C1A', 30, 70],
+    sky: '#0A0C1A',
+    update(t) {
+      panels.forEach(({ cv, off }, k) => {
+        const c = cv.canvas.getContext('2d');
+        const W = cv.canvas.width;
+        const H = cv.canvas.height;
+        c.clearRect(0, 0, W, H);
+        c.fillStyle = 'rgba(13,16,36,0.92)';
+        c.strokeStyle = '#2B3366';
+        c.lineWidth = 4;
+        c.beginPath();
+        c.roundRect(2, 2, W - 4, H - 4, 18);
+        c.fill();
+        c.stroke();
+        ['#FF5A5F', '#FFD23F', '#5BE37D'].forEach((col, i) => {
+          c.fillStyle = col;
+          c.beginPath();
+          c.arc(26 + i * 22, 24, 7, 0, Math.PI * 2);
+          c.fill();
+        });
+        c.font = `22px "Consolas", monospace`;
+        const rows = Math.floor((H - 60) / 28);
+        const scroll = Math.floor(t * (0.8 + k * 0.25) + off);
+        for (let i = 0; i < rows; i++) {
+          const [col, txt] = LOG[(i + scroll) % LOG.length];
+          c.fillStyle = col;
+          c.globalAlpha = 0.55 + 0.45 * (i / rows);
+          c.fillText(txt, 22, 66 + i * 28);
+        }
+        c.globalAlpha = 1;
+        cv.tex.needsUpdate = true;
+      });
+    },
+  };
+}
+
 // ---------- SERVIDOR ----------
 function servidor() {
   const g = new THREE.Group();
@@ -321,6 +408,6 @@ function plato(ep) {
 }
 
 export function createBackgrounds(ep) {
-  return { oficina: oficina(), servidor: servidor(), plato: plato(ep) };
+  return { terminal: terminal(), oficina: oficina(), servidor: servidor(), plato: plato(ep) };
 }
-export const BACKGROUND_NAMES = ['oficina', 'servidor', 'plato'];
+export const BACKGROUND_NAMES = ['terminal', 'oficina', 'servidor', 'plato'];

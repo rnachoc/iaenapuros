@@ -86,7 +86,7 @@ async function build() {
   // ---- segmentos de pose / cámara / fondo ----
   const poseSegs = [{ t: -10, pose: EP.lines[0].pose || 'normal' }];
   const camSegs = [{ t: -10, cam: EP.lines[0].cam || 'medio' }];
-  const bgSegs = [{ t: -10, bg: EP.lines[0].bg || EP.background || 'oficina' }];
+  const bgSegs = [{ t: -10, bg: EP.lines[0].bg || EP.background || 'terminal' }];
   EP.lines.forEach((ln) => {
     if (ln.pose) poseSegs.push({ t: ln.start - 0.08, pose: ln.pose });
     if (ln.react) poseSegs.push({ t: ln.start + (ln.react.at || 0.8), pose: ln.react.pose });
@@ -160,7 +160,7 @@ async function build() {
     // fondo
     const bgName = bgSegs[segAt(bgSegs, t)].bg;
     for (const [name, b] of Object.entries(bgs)) b.group.visible = name === bgName;
-    const bg = bgs[bgName] || bgs.oficina;
+    const bg = bgs[bgName] || bgs.terminal;
     scene.background = new THREE.Color(bg.sky);
     scene.fog = new THREE.Fog(bg.fog[0], bg.fog[1], bg.fog[2]);
     const alarmAmt = fxAmount(t, 'alarma');
