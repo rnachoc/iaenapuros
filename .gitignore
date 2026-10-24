@@ -11,6 +11,7 @@ __pycache__/
 build/
 engine/dist/
 out/
+para-publicar/
 .hyperframes/
 *.log
 # grabación personal de voz (no se sube)

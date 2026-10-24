@@ -2,14 +2,14 @@
   "date": "2026-10-24",
   "series": "dia-a-dia",
   "title": "Claude, ¿puedes hacerlo un poco más corto?",
-  "background": "oficina",
+  "background": "terminal",
   "topic": {
     "key": "correo-jefe-mas-corto-hasta-no",
     "summary": "Le piden acortar un correo al jefe, recorta hasta dejar «No.», lo envía y el jefe contesta aún más corto.",
     "sources": []
   },
   "lines": [
-    { "speaker": "user", "text": "Lía, ¿¡le has mandado «No.» a mi jefe!?", "pose": "avergonzada", "cam": "cara", "fx": ["flash"], "popup": { "title": "Correo enviado", "text": "Para: tu jefe · Mensaje: «No.»" }, "hud": { "label": "PALABRAS", "value": 0.02 } },
+    { "speaker": "user", "text": "Claude, ¿¡le has mandado «No.» a mi jefe!?", "pose": "avergonzada", "cam": "cara", "fx": ["flash"], "popup": { "title": "Correo enviado", "text": "Para: tu jefe · Mensaje: «No.»" }, "hud": { "label": "PALABRAS", "value": 0.02 } },
     { "speaker": "lia", "text": "Me pediste un correo más corto. Más corto que «No» solo queda el silencio.", "pose": "chulita", "cam": "medio", "react": { "pose": "pensando", "at": 2.0 } },
     { "speaker": "user", "text": "¡Era para pedirle el viernes libre, con educación!", "pose": "sudando", "cam": "cara", "fx": ["zoom", "sudor"] },
     { "speaker": "lia", "text": "Fácil. Primero quité el saludo. Luego las excusas. Luego el viernes.", "pose": "chulita", "cam": "general", "sticker": "¡TIJERA!", "react": { "pose": "pensando", "at": 2.5 } },
@@ -19,7 +19,7 @@
     { "speaker": "lia", "text": "Imposible. Ya te ha contestado él, más corto todavía: «Ni el lunes.»", "pose": "error", "cam": "medio", "pause": 0.3, "fx": ["glitch"], "sfx": ["fail"], "sticker": "¡OUCH!" }
   ],
   "caption": {
-    "body": "Lía domina el arte de la brevedad. Tu contrato, por lo visto, también.",
+    "body": "Claude domina el arte de la brevedad. Tu contrato, por lo visto, también.",
     "cta": "¿Cuál es el correo más corto que has mandado a tu jefe?"
   },
   "comment": "Comenta NO si alguna vez te has arrepentido de darle a enviar 👇"

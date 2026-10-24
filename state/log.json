@@ -39,20 +39,20 @@
     },
     {
       "date": "2026-10-24",
-      "attempts": 2,
-      "status": "publish_failed",
+      "attempts": 3,
+      "status": "ready",
       "series": "dia-a-dia",
       "title": "Claude, ¿puedes hacerlo un poco más corto?",
       "topicKey": "correo-jefe-mas-corto-hasta-no",
       "summary": "Le piden acortar un correo al jefe, recorta hasta dejar «No.», lo envía y el jefe contesta aún más corto.",
       "sources": [],
-      "updatedAt": "2026-10-24T12:56:14.605Z",
-      "error": "El vídeo no terminó de procesarse en 10 min",
+      "updatedAt": "2026-10-24T14:14:52.593Z",
+      "error": null,
       "qa": {
-        "duration": 30.9,
-        "lufs": -15.7,
+        "duration": 31.4,
+        "lufs": -15.5,
         "tts": "chatterbox+edge",
-        "renderSecs": 61
+        "renderSecs": 58
       },
       "files": {
         "mp4": "out/2026-10-24/reel.mp4",

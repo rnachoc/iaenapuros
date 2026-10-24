@@ -5,6 +5,7 @@
   "scripts": {
     "daily": "node scripts/daily.mjs",
     "publish": "node scripts/publish.mjs",
+    "export": "node scripts/export.mjs",
     "context": "node scripts/context.mjs",
     "produce": "node scripts/produce.mjs",
     "snap": "node scripts/snap.mjs",
