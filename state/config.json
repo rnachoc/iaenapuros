@@ -1,7 +1,8 @@
 {
   "publish": {
-    "mode": "dry-run",
-    "graphVersion": "v26.0"
+    "mode": "live",
+    "graphVersion": "v26.0",
+    "changedAt": "2026-10-24T12:30:58.834Z"
   },
   "schedule": {
     "time": "19:30",

@@ -22,6 +22,28 @@
         "javi (28s): El giro de las 40 páginas recoloca todo: confianza del 100% al 3% de golpe y '¡PILLADA!' con 'las otras 860 eran rarísimas'.",
         "marta (30s): 'El PDF tiene 40 páginas' + 'las otras 860 eran rarísimas': remate muy gracioso y reconocible."
       ]
+    },
+    "2026-10-24": {
+      "titulo": "Claude, ¿puedes hacerlo un poco más corto?",
+      "serie": "dia-a-dia",
+      "rondas": 2,
+      "puntuacion": 8.7,
+      "retencion": 100,
+      "gancho": 7.2,
+      "fallos": {
+        "ritmo_lento": 5,
+        "gancho_lento": 4,
+        "confuso": 4,
+        "chiste_previsible": 3,
+        "otro": 5,
+        "demasiado_largo": 2,
+        "texto_dificil": 3
+      },
+      "mejores_momentos": [
+        "lucia (29s): «Ni el lunes.» El jefe contesta aún más corto y encima te quita el lunes; lo mandaría al grupo de clase.",
+        "javi (29s): «Ni el lunes» le da la vuelta: el jefe comprime mejor que la IA y te despide en tres palabras. Remate limpio",
+        "marta (29s): El jefe contesta 'Ni el lunes.': me imagino perfectamente la cara y me da la risa porque me podría pasar con la IA del móvil"
+      ]
     }
   }
 }

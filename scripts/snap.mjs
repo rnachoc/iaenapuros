@@ -33,7 +33,7 @@ if (arg('poses')) {
     t += 1.5;
   });
   const tl = { duration: +(t + 0.5).toFixed(2), lines };
-  const ep = { date: 'identidad', title: 'Lía: hoja de identidad (poses y fondos)', series: 'dia-a-dia', topic: { key: 'identidad' } };
+  const ep = { date: 'identidad', title: 'Claude: hoja de identidad (poses y fondos)', series: 'dia-a-dia', topic: { key: 'identidad' } };
   const silent = P('build', 'silence.wav');
   fs.mkdirSync(path.dirname(silent), { recursive: true });
   ffmpeg(['-f', 'lavfi', '-i', `anullsrc=r=48000:cl=stereo`, '-t', String(tl.duration), silent]);

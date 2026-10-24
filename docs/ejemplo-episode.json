@@ -19,7 +19,7 @@
     { "speaker": "lia", "text": "Ya decía yo que las otras 860 eran rarísimas.", "say": "Ya decía yo que las otras ochocientas sesenta eran rarísimas.", "pose": "error", "cam": "medio", "fx": ["alarma"], "sfx": ["fail"], "sticker": "¡PILLADA!" }
   ],
   "caption": {
-    "body": "Lía se lo ha leído todo. Incluso lo que no existe.",
+    "body": "Claude se lo ha leído todo. Incluso lo que no existe.",
     "cta": "¿Cuál es la mentira más gorda que te ha soltado tu IA con toda la seguridad del mundo?"
   },
   "comment": "Comenta PILLADA si tu IA también se inventa las cosas sin despeinarse 👇"

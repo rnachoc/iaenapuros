@@ -58,14 +58,15 @@ export async function publish(date, { dryRun, review } = {}) {
     body: fs.readFileSync(mp4),
   });
   const upRes = await up.json().catch(() => ({}));
-  if (!up.ok || upRes.success === false || upRes.debug_info) throw new Error('Subida fallida: ' + JSON.stringify(upRes.debug_info || upRes).slice(0, 300));
+  // rupload a veces responde 400 ProcessingFailedError aunque el contenedor acabe en FINISHED: se decide por su estado
+  const upError = !up.ok || upRes.success === false || upRes.debug_info ? 'Subida fallida: ' + JSON.stringify(upRes.debug_info || upRes).slice(0, 300) : null;
 
   let status = 'IN_PROGRESS';
   for (let i = 0; i < 20 && status !== 'FINISHED'; i++) {
     await sleep(30000);
     const st = await graph.get(`/${container.id}`, { token, query: { fields: 'status_code,status' } });
     status = st.status_code;
-    if (status === 'ERROR' || status === 'EXPIRED') throw new Error(`Contenedor ${status}: ${st.status || ''}`);
+    if (status === 'ERROR' || status === 'EXPIRED') throw new Error(`${upError ? upError + ' · ' : ''}Contenedor ${status}: ${st.status || ''}`);
   }
   if (status !== 'FINISHED') throw new Error('El vídeo no terminó de procesarse en 10 min');
 

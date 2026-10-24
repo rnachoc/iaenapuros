@@ -2,7 +2,7 @@
 import { clamp, smooth, easeOutBack, easeOutCubic, noise1 } from './util.js';
 
 const SPEAKER = {
-  lia: { label: 'LÍA', cls: 'sp-lia' },
+  lia: { label: 'CLAUDE', cls: 'sp-lia' },
   user: { label: 'TÚ', cls: 'sp-user' },
   narrador: { label: 'NOTICIA', cls: 'sp-news' },
 };

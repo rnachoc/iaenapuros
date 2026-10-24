@@ -17,9 +17,9 @@ export const TAGS = {
   poco_relatable: 'Parte de situaciones que le pasan a cualquiera con la IA (trabajo, clase, móvil), no de casos de nicho.',
   demasiado_tecnico: 'Si hay jerga (tokens, contexto, API), el chiste se tiene que entender sin conocerla.',
   confuso: 'Quién habla y qué pasa tiene que entenderse en silencio, solo con la imagen y los subtítulos.',
-  texto_dificil: 'Frases de subtítulo cortas; título de 2 líneas como máximo; nada de texto sobre la cara de Lía.',
+  texto_dificil: 'Frases de subtítulo cortas; título de 2 líneas como máximo; nada de texto sobre la cara de Claude.',
   visual_estatico: 'Al menos 4 cambios de pose y 1-2 efectos (fx) repartidos; usa cam "cara" en las reacciones.',
-  personaje_plano: 'Lía exagera sus reacciones: usa react a mitad de línea y poses extremas en el clímax.',
+  personaje_plano: 'Claude exagera sus reacciones: usa react a mitad de línea y poses extremas en el clímax.',
   demasiado_largo: 'Apunta a 30-35 s: corta frases de transición y deja solo los golpes.',
   cta_floja: 'La pregunta del pie es personal y fácil de contestar en una palabra o con una anécdota.',
 };
@@ -56,8 +56,8 @@ export function prep(date) {
   const sheets = fs.readdirSync(dir).filter((f) => f.startsWith('hoja_')).map((f) => path.join(dir, f));
 
   const dur = durationOf(mp4);
-  const who = { lia: 'LÍA (la IA, voz femenina)', user: 'TÚ (el usuario, voz masculina)', narrador: 'NARRADORA (noticia)' };
-  const lines = tl.lines.map((l) => `[${l.start.toFixed(1)}-${l.end.toFixed(1)} s] ${who[l.speaker] || l.speaker}: ${l.text}${l.pose ? `   (Lía: ${l.pose})` : ''}`);
+  const who = { lia: 'CLAUDE (la IA, voz femenina)', user: 'TÚ (el usuario, voz masculina)', narrador: 'NARRADORA (noticia)' };
+  const lines = tl.lines.map((l) => `[${l.start.toFixed(1)}-${l.end.toFixed(1)} s] ${who[l.speaker] || l.speaker}: ${l.text}${l.pose ? `   (Claude: ${l.pose})` : ''}`);
   const ep = readJSON(path.join(epDir(date), 'episode.json'));
   const caption = fs.existsSync(path.join(out, 'caption.txt')) ? fs.readFileSync(path.join(out, 'caption.txt'), 'utf8').trim() : '';
   fs.writeFileSync(

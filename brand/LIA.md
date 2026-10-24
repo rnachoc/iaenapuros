@@ -1,4 +1,4 @@
-# Lía, la IA en apuros
+# Claude, en apuros (parodia no oficial; antes "Lía")
 
 - **Qué es:** un robot de bloques turquesa (#2EC4B6) con manos y orejas amarillas (#FFD23F). Su cara es una pantalla LED con ojos y boca animados.
 - **Antena:** es su "barra de contexto". El LED pasa de verde a ámbar y a rojo según el estrés, y parpadea cuando está al límite.

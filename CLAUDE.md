@@ -1,6 +1,6 @@
 # @iaenapuros: reglas del proyecto
 
-Canal de humor sobre IA (Instagram y TikTok). Cada día se publica 1 reel 9:16 de 30-45 s con **Lía**, una IA de bloques que siempre está en apuros. Las decisiones de marca están en `docs/DECISIONES.md`.
+Canal de humor sobre IA (Instagram y TikTok). Cada día se publica 1 reel 9:16 de 30-45 s con **Claude** (parodia no oficial, robot de bloques de diseño propio), que siempre está en apuros. Las decisiones de marca están en `docs/DECISIONES.md`.
 
 ## Reglas duras
 - Solo herramientas locales o gratuitas. Ninguna API de pago ni claves de modelos.
@@ -21,7 +21,7 @@ Canal de humor sobre IA (Instagram y TikTok). Cada día se publica 1 reel 9:16 d
 6. `npm run publish -- --review "ok: <nota corta>"`.
 
 ## Mapa
-- `engine/src/`: motor Three.js (rig de Lía, poses, fondos y capas). Se toca una sola vez, no a diario.
+- `engine/src/`: motor Three.js (rig del personaje, poses, fondos y capas). Se toca una sola vez, no a diario.
 - `engine/template/index.html`: composición HyperFrames.
 - `scripts/`: pipeline (`daily`, `produce`, `voice`, `build`, `qa`, `caption`, `publish`, `snap`).
 - `state/`: `config.json` (modo y voces), `log.json` (historial de temas, fuentes y estado) y `aprendizaje.json` (veredictos del jurado).

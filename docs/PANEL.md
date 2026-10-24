@@ -43,7 +43,7 @@ Eres la persona del perfil y estás haciendo scroll en Instagram Reels a una hor
 | `confuso` | no se entiende qué pasa o quién habla |
 | `texto_dificil` | título o subtítulos difíciles de leer, tapados o demasiado largos |
 | `visual_estatico` | poca acción, el personaje apenas cambia |
-| `personaje_plano` | Lía no transmite emoción o carisma |
+| `personaje_plano` | Claude no transmite emoción o carisma |
 | `demasiado_largo` | sobraban segundos |
 | `cta_floja` | el pie o la pregunta final no invitan a comentar |
 | `otro` | cualquier otra cosa (explícala en `detalle`) |
