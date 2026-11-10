@@ -5,14 +5,27 @@
 // Uso: node scripts/publish-next.mjs [--dry-run]   (en dry-run solo dice qué publicaría)
 import fs from 'node:fs';
 import path from 'node:path';
-import { arg, readJSON, readLog, upsertLog, outDir, config, todayMadrid } from './lib/common.mjs';
+import { arg, readJSON, readLog, upsertLog, outDir, config, todayMadrid, P } from './lib/common.mjs';
 import { graph, ensureToken } from './lib/meta.mjs';
 import { publish } from './publish.mjs';
 
+// bloqueo: si dos ejecuciones coinciden (p. ej. una atrasada y la siguiente), solo una publica
+const LOCK = P('state', 'publish.lock');
+let locked = false;
 const done = (code, o) => {
+  if (locked) fs.rmSync(LOCK, { force: true });
   console.log('RESULTADO ' + JSON.stringify(o));
   process.exit(code);
 };
+try {
+  fs.writeFileSync(LOCK, new Date().toISOString(), { flag: 'wx' });
+  locked = true;
+} catch {
+  // un bloqueo de más de 30 min es de una ejecución que murió: se ignora
+  if (Date.now() - fs.statSync(LOCK).mtimeMs < 30 * 60 * 1000) done(0, { ok: true, estado: 'ocupado', detalle: 'otra publicación en curso' });
+  fs.writeFileSync(LOCK, new Date().toISOString());
+  locked = true;
+}
 const title = (s) => (s || '').split('\n')[0].trim().normalize('NFC');
 const captionOf = (date) => {
   const f = path.join(outDir(date), 'caption.txt');

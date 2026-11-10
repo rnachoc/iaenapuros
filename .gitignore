@@ -20,3 +20,4 @@ brand/voz-provisional.*
 models/
 # skills de terceros (se restauran con: npx skills experimental_install)
 .claude/skills/
+state/publish.lock
