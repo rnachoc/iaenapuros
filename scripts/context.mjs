@@ -30,3 +30,14 @@ if (fs.existsSync(ap)) {
   if (rules.length) console.log('LECCIONES DEL JURADO (obligatorio aplicarlas):\n' + rules.join('\n'));
   if (top.length) console.log('Reels que mejor funcionaron:\n' + top.slice(0, 3).join('\n'));
 }
+
+// lecciones de la audiencia real: las propone el Estratega cada semana y solo se guardan tras aprobarlas
+const fa = P('docs', 'FEEDBACK-AUDIENCIA.md');
+if (fs.existsSync(fa)) {
+  const reglas = (fs.readFileSync(fa, 'utf8').split('## Reglas activas')[1] || '')
+    .split('\n## ')[0]
+    .split('\n')
+    .filter((l) => l.startsWith('- ') && !l.includes('(todavía'))
+    .slice(0, 8);
+  if (reglas.length) console.log('LECCIONES DE LA AUDIENCIA REAL (obligatorio aplicarlas):\n' + reglas.join('\n'));
+}
