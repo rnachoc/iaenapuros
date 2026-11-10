@@ -37,7 +37,8 @@ Es necesario porque solo la vía de Facebook Login permite subir el vídeo desde
 ## 3. Token y configuración (≈3 min)
 1. En la carpeta del proyecto, copia `.env.example` como `.env` y rellena `META_APP_ID` y `META_APP_SECRET`.
 2. Abre el **Explorador de la API Graph** (https://developers.facebook.com/tools/explorer). Elige tu app, pulsa *Generar token de acceso* y marca estos permisos:
-   `instagram_basic`, `instagram_content_publish`, `instagram_manage_comments`, `pages_show_list`, `pages_read_engagement`, `business_management`.
+   `instagram_basic`, `instagram_content_publish`, `instagram_manage_comments`, `instagram_manage_insights`, `pages_show_list`, `pages_read_engagement`, `business_management`.
+   (`instagram_manage_insights` es para las analíticas de `npm run insights`; sin él, solo se leen seguidores, me gusta y comentarios.)
    Acepta el diálogo y elige tu Página y tu cuenta de Instagram.
 3. Pega el token en `.env` como `META_SHORT_TOKEN=...` y guarda.
 4. Ejecuta:
@@ -64,3 +65,4 @@ Cuando hayas visto un par de dry-runs y estés conforme, escribe en Claude Code:
 - `npm run daily -- --date AAAA-MM-DD --force` rehace un día.
 - Si edge-tts falla (sin red), se usa automáticamente la voz local de Windows (Helena, es-ES).
 - Si caduca el acceso a datos de Meta (unos 90 días sin usar la app), repite el paso 3.
+- `npm run publish:check` comprueba token, permisos y cuota de Instagram sin publicar. `npm run ig:test` prueba la subida completa sin publicar (el contenedor caduca solo en 24 h). La subida necesita `META_USER_TOKEN` en `.env` (lo escribe `ig:setup`).

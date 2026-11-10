@@ -1,6 +1,6 @@
 // Publicación del reel. Dos vías (state/config.json → publish.provider):
 //   "posteverywhere" (por defecto): Instagram Reels + TikTok a la vez vía la API de PostEverywhere
-//   "meta": solo Instagram, directo con la Graph API (subida reanudable desde archivo local)
+//   "meta": solo Instagram, directo con la Graph API (subida reanudable desde archivo local, firmada con el token de usuario)
 // Uso: node scripts/publish.mjs [--date D] [--dry-run] [--review "nota"]
 //      node scripts/publish.mjs --set-mode live|dry-run
 //      node scripts/publish.mjs --check          (comprueba plan y cuentas sin publicar nada)
@@ -101,7 +101,43 @@ async function publishPE({ date, out, mp4, caption, comment, mode, review, entry
   return { ok: true, ...record };
 }
 
+// Meta: token, permisos, cuota y token de usuario para la subida (solo lecturas)
+const NEEDED_SCOPES = ['instagram_basic', 'instagram_content_publish', 'instagram_manage_comments', 'pages_show_list'];
+async function checkMeta() {
+  const env = loadEnv();
+  const problemas = [];
+  const { token, igUserId, warnings } = await ensureToken();
+  if (!env.META_USER_TOKEN) problemas.push('falta META_USER_TOKEN: rupload solo acepta la subida firmada con el token de usuario');
+  let permisos = null;
+  if (env.META_APP_ID && env.META_APP_SECRET) {
+    const d = (await graph.get('/debug_token', { query: { input_token: env.META_USER_TOKEN || token, access_token: `${env.META_APP_ID}|${env.META_APP_SECRET}` } })).data;
+    permisos = d.scopes || [];
+    const faltan = NEEDED_SCOPES.filter((s) => !permisos.includes(s));
+    if (faltan.length) problemas.push('faltan permisos: ' + faltan.join(', '));
+  }
+  const q = (await graph.get(`/${igUserId}/content_publishing_limit`, { token, query: { fields: 'quota_usage,config' } })).data?.[0] || {};
+  const total = q.config && q.config.quota_total;
+  if (total && q.quota_usage >= total) problemas.push(`cuota agotada (${q.quota_usage}/${total} en 24 h)`);
+  return {
+    ok: problemas.length === 0,
+    provider: 'meta',
+    subida: 'rupload (firmada con token de usuario)',
+    cuota: total ? `${q.quota_usage}/${total} en 24 h` : null,
+    insights: permisos ? permisos.includes('instagram_manage_insights') : null,
+    avisos: warnings,
+    problemas,
+  };
+}
+
+// guarda contra duplicados: Nacho también sube a mano, así que si hoy ya hay un reel con el mismo título no se publica otro
+async function alreadyPosted(token, igUserId, date, caption) {
+  const title = caption.split('\n')[0].trim();
+  const r = await graph.get(`/${igUserId}/media`, { token, query: { fields: 'id,caption,timestamp,permalink', limit: '10' } });
+  return (r.data || []).find((m) => m.timestamp && todayMadrid(new Date(m.timestamp)) === date && (m.caption || '').trim().startsWith(title)) || null;
+}
+
 export async function check() {
+  if (((config().publish || {}).provider || 'posteverywhere') === 'meta') return checkMeta();
   const platforms = (config().publish || {}).platforms || ['instagram', 'tiktok'];
   const me = await pe.me();
   const { picked, problems } = await pickAccounts(platforms);
@@ -141,9 +177,10 @@ export async function publish(date, { dryRun, review } = {}) {
       graphVersion: graphVersion(),
       credentials: env.IG_USER_ID && (env.META_PAGE_TOKEN || env.META_USER_TOKEN) ? 'presentes' : 'pendientes (npm run ig:setup)',
       steps: [
+        'GET /{IG_USER_ID}/media: si hoy (Madrid) ya hay un reel cuyo pie empieza por el mismo título, no se publica y se marca como publicado',
         'POST graph.facebook.com/{v}/{IG_USER_ID}/media {media_type: REELS, upload_type: resumable, caption, thumb_offset: 0, is_ai_generated: true}',
-        `POST rupload.facebook.com/ig-api-upload/{v}/{container} (archivo local, ${(size / 1e6).toFixed(1)} MB)`,
-        'GET /{container}?fields=status_code hasta FINISHED',
+        `POST {uri del contenedor} en rupload.facebook.com, firmado con META_USER_TOKEN (archivo local, ${(size / 1e6).toFixed(1)} MB); si falla, se para al momento`,
+        'GET /{container}?fields=status_code cada 15 s hasta FINISHED (ERROR o EXPIRED paran al momento)',
         'POST /{IG_USER_ID}/media_publish {creation_id}',
         'POST /{media_id}/comments {message: comentario}',
       ],
@@ -157,6 +194,13 @@ export async function publish(date, { dryRun, review } = {}) {
   }
 
   const { token, igUserId, warnings } = await ensureToken();
+  const dup = await alreadyPosted(token, igUserId, date, caption);
+  if (dup) {
+    const res = { mode, mediaId: dup.id, permalink: dup.permalink, at: new Date().toISOString(), review: review || null, nota: 'ya estaba publicado (subida a mano): no se duplica' };
+    writeJSON(path.join(out, 'publish.json'), res);
+    upsertLog(date, { status: 'published', publish: res });
+    return { ok: true, skipped: 'ya publicado hoy con el mismo título', permalink: dup.permalink };
+  }
   const container = await graph.post(`/${igUserId}/media`, {
     token,
     json: { media_type: 'REELS', upload_type: 'resumable', caption, thumb_offset: 0, is_ai_generated: true },
@@ -164,19 +208,19 @@ export async function publish(date, { dryRun, review } = {}) {
   const uploadUri = container.uri || `https://rupload.facebook.com/ig-api-upload/${graphVersion()}/${container.id}`;
   const up = await fetch(uploadUri, {
     method: 'POST',
-    headers: { Authorization: `OAuth ${token}`, offset: '0', file_size: String(size) },
+    // rupload devuelve 500 ProcessingFailedError si se firma con el token de Página (probado el 10/11): va con el de usuario
+    headers: { Authorization: `OAuth ${loadEnv().META_USER_TOKEN || token}`, offset: '0', file_size: String(size) },
     body: fs.readFileSync(mp4),
   });
   const upRes = await up.json().catch(() => ({}));
-  // rupload a veces responde 400 ProcessingFailedError aunque el contenedor acabe en FINISHED: se decide por su estado
-  const upError = !up.ok || upRes.success === false || upRes.debug_info ? 'Subida fallida: ' + JSON.stringify(upRes.debug_info || upRes).slice(0, 300) : null;
+  if (!up.ok || upRes.success === false || upRes.debug_info) throw new Error(`Subida fallida (HTTP ${up.status}): ` + JSON.stringify(upRes.debug_info || upRes).slice(0, 300));
 
   let status = 'IN_PROGRESS';
-  for (let i = 0; i < 20 && status !== 'FINISHED'; i++) {
-    await sleep(30000);
+  for (let i = 0; i < 40 && status !== 'FINISHED'; i++) {
+    await sleep(15000);
     const st = await graph.get(`/${container.id}`, { token, query: { fields: 'status_code,status' } });
     status = st.status_code;
-    if (status === 'ERROR' || status === 'EXPIRED') throw new Error(`${upError ? upError + ' · ' : ''}Contenedor ${status}: ${st.status || ''}`);
+    if (status === 'ERROR' || status === 'EXPIRED') throw new Error(`Contenedor ${status}: ${st.status || ''}`);
   }
   if (status !== 'FINISHED') throw new Error('El vídeo no terminó de procesarse en 10 min');
 
