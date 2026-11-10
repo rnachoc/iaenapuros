@@ -129,11 +129,12 @@ async function checkMeta() {
   };
 }
 
-// guarda contra duplicados: Nacho también sube a mano, así que si hoy ya hay un reel con el mismo título no se publica otro
-async function alreadyPosted(token, igUserId, date, caption) {
+// guarda contra duplicados: Nacho también sube a mano, así que si ya hay un reel con el mismo título no se publica otro
+// (los títulos no se repiten: daily.mjs lo impide)
+async function alreadyPosted(token, igUserId, caption) {
   const title = caption.split('\n')[0].trim();
-  const r = await graph.get(`/${igUserId}/media`, { token, query: { fields: 'id,caption,timestamp,permalink', limit: '10' } });
-  return (r.data || []).find((m) => m.timestamp && todayMadrid(new Date(m.timestamp)) === date && (m.caption || '').trim().startsWith(title)) || null;
+  const r = await graph.get(`/${igUserId}/media`, { token, query: { fields: 'id,caption,timestamp,permalink', limit: '25' } });
+  return (r.data || []).find((m) => (m.caption || '').split('\n')[0].trim() === title) || null;
 }
 
 export async function check() {
@@ -177,7 +178,7 @@ export async function publish(date, { dryRun, review } = {}) {
       graphVersion: graphVersion(),
       credentials: env.IG_USER_ID && (env.META_PAGE_TOKEN || env.META_USER_TOKEN) ? 'presentes' : 'pendientes (npm run ig:setup)',
       steps: [
-        'GET /{IG_USER_ID}/media: si hoy (Madrid) ya hay un reel cuyo pie empieza por el mismo título, no se publica y se marca como publicado',
+        'GET /{IG_USER_ID}/media: si ya hay un reel con el mismo título (subido a mano), no se publica y se marca como publicado',
         'POST graph.facebook.com/{v}/{IG_USER_ID}/media {media_type: REELS, upload_type: resumable, caption, thumb_offset: 0, is_ai_generated: true}',
         `POST {uri del contenedor} en rupload.facebook.com, firmado con META_USER_TOKEN (archivo local, ${(size / 1e6).toFixed(1)} MB); si falla, se para al momento`,
         'GET /{container}?fields=status_code cada 15 s hasta FINISHED (ERROR o EXPIRED paran al momento)',
@@ -194,7 +195,7 @@ export async function publish(date, { dryRun, review } = {}) {
   }
 
   const { token, igUserId, warnings } = await ensureToken();
-  const dup = await alreadyPosted(token, igUserId, date, caption);
+  const dup = await alreadyPosted(token, igUserId, caption);
   if (dup) {
     const res = { mode, mediaId: dup.id, permalink: dup.permalink, at: new Date().toISOString(), review: review || null, nota: 'ya estaba publicado (subida a mano): no se duplica' };
     writeJSON(path.join(out, 'publish.json'), res);
@@ -233,7 +234,13 @@ export async function publish(date, { dryRun, review } = {}) {
   try {
     commentId = (await graph.post(`/${media.id}/comments`, { token, query: { message: comment } })).id;
   } catch (e) {
-    warnings.push('Comentario no publicado: ' + e.message);
+    // Meta crea el comentario aunque responda 400 "does not support the requested response format" (10/11):
+    // se comprueba si existe y NUNCA se reintenta, para no duplicarlo
+    try {
+      const cs = await graph.get(`/${media.id}/comments`, { token, query: { fields: 'id,text' } });
+      commentId = ((cs.data || []).find((c) => c.text === comment) || {}).id || null;
+    } catch {}
+    if (!commentId) warnings.push('Comentario no publicado: ' + e.message);
   }
   const res = { mode, mediaId: media.id, permalink, commentId, warnings, at: new Date().toISOString(), review: review || null };
   writeJSON(path.join(out, 'publish.json'), res);

@@ -55,6 +55,7 @@ En Claude Desktop → *Settings* → activa **"Keep computer awake"**. Las tarea
 
 ## 6. Activar la publicación real
 Cuando hayas visto un par de dry-runs y estés conforme, escribe en Claude Code: **"activar publicación"**. Claude ejecutará `npm run publish:mode -- live`. Para volver atrás: `npm run publish:mode -- dry-run`.
+Activada el 10/11. La tarea *@iaenapuros · publicar* (Claude Desktop → **Scheduled**) publica a las 12:30 y a las 20:30 el reel pendiente más antiguo: con atrasos salen 2 al día; al día, 1. Para pausarla, desactiva la tarea o vuelve a `dry-run`. `npm run publish:next -- --dry-run` dice qué publicaría.
 
 ## Cada día (opcional, 1 min)
 - **Fijar el comentario:** la API no permite fijarlo. En el reel, mantén pulsado el comentario de @iaenapuros → *Fijar*.
