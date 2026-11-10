@@ -19,6 +19,9 @@
     "panel:finalize": "node scripts/panel.mjs finalize",
     "publish:check": "node scripts/publish.mjs --check",
     "publish:next": "node scripts/publish-next.mjs",
+    "insights": "node scripts/insights.mjs",
+    "marketing:report": "node scripts/marketing-report.mjs",
+    "brain:status": "node scripts/brain-status.mjs",
     "tiktok:setup": "node scripts/tiktok-setup.mjs",
     "tiktok:draft": "node scripts/tiktok-draft.mjs",
     "ig:test": "node scripts/ig-test.mjs"

@@ -23,5 +23,9 @@ export function exportDay(date, portada) {
 }
 
 if (process.argv[1] && process.argv[1].endsWith('export.mjs')) {
-  console.log(JSON.stringify(exportDay(arg('date', todayMadrid()), arg('portada'))));
+  const r = exportDay(arg('date', todayMadrid()), arg('portada'));
+  try {
+    (await import('./brain-status.mjs')).writeBrainStatus();
+  } catch {}
+  console.log(JSON.stringify(r));
 }

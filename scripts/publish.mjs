@@ -270,13 +270,20 @@ if (process.argv[1] && process.argv[1].endsWith('publish.mjs')) {
       });
   } else {
     const date = arg('date', todayMadrid());
+    const signal = async () => {
+      try {
+        (await import('./brain-status.mjs')).writeBrainStatus();
+      } catch {}
+    };
     publish(date, { dryRun: !!arg('dry-run'), review: typeof arg('review') === 'string' ? arg('review') : null })
-      .then((r) => {
+      .then(async (r) => {
+        await signal();
         console.log(JSON.stringify(r));
         process.exit(r.ok ? 0 : 1);
       })
-      .catch((e) => {
+      .catch(async (e) => {
         upsertLog(date, { status: 'publish_failed', error: e.message });
+        await signal();
         console.log(JSON.stringify({ ok: false, error: e.message }));
         process.exit(1);
       });

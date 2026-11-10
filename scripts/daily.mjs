@@ -3,14 +3,18 @@
 //   npm run daily -- --publish        → además publica (según el modo de config: dry-run o live)
 //   flags: --date YYYY-MM-DD  --dry-run  --draft  --local-tts  --review "nota"  --force (rehacer un día ya hecho en dry-run)
 import path from 'node:path';
-import { arg, todayMadrid, readLog, upsertLog, ROOT } from './lib/common.mjs';
+import { arg, todayMadrid, readLog, upsertLog, ROOT, P, run, readJSON } from './lib/common.mjs';
 import { loadEpisode, produce } from './produce.mjs';
 import { writeCaptions } from './caption.mjs';
 import { publish } from './publish.mjs';
+import { writeBrainStatus } from './brain-status.mjs';
 
 const MAX_ATTEMPTS = 7; // QA: 1 + 2 reintentos por cada una de las 3 rondas del jurado (con margen)
 const date = arg('date', todayMadrid());
 const done = (code, o) => {
+  try {
+    writeBrainStatus();
+  } catch {}
   console.log('RESULTADO ' + JSON.stringify({ fecha: date, ...o }));
   process.exit(code);
 };
@@ -19,6 +23,15 @@ const norm = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[^a-z0-9]/
 const entry = readLog().episodes.find((e) => e.date === date) || {};
 if (entry.status === 'published' || (entry.status === 'dry-run' && !arg('force')))
   done(0, { ok: true, estado: entry.status === 'published' ? 'ya_publicado' : 'ya_hecho_dry_run', enlace: entry.publish && entry.publish.permalink });
+
+// números de marketing al día, sin modelo: como mucho cada 6 h y con límite de tiempo; si Instagram no responde, se sigue
+const ins = readJSON(P('state', 'insights.json'), null);
+if (!ins || Date.now() - Date.parse(ins.updatedAt || 0) > 6 * 36e5)
+  for (const s of ['insights.mjs', 'marketing-report.mjs']) {
+    try {
+      run(process.execPath, [P('scripts', s)], { check: false, timeout: 120000 });
+    } catch {}
+  }
 
 const ep = loadEpisode(date);
 if (!ep) done(2, { ok: false, estado: 'falta_episodio', siguiente: `escribe episodes/${date}/episode.json (ver npm run context y docs/EPISODE.md)` });

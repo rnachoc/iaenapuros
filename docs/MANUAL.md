@@ -60,6 +60,7 @@ Activada el 10/11. La tarea *@iaenapuros · publicar* (Claude Desktop → **Sche
 ## Cada día (opcional, 1 min)
 - **Fijar el comentario:** la API no permite fijarlo. En el reel, mantén pulsado el comentario de @iaenapuros → *Fijar*.
 - **TikTok:** el borrador llega solo (paso 0); publícalo desde la app pegando el pie de `out/tiktok/AAAA-MM-DD_iaenapuros_pie.txt`.
+- **Números:** `npm run insights` y `npm run marketing:report` (los lanza solo `daily`). El informe queda en `marketing/informes/<fecha>.md`.
 - **Revisión:** el historial está en `state/log.json` y la hoja de fotogramas de cada día en `out/<fecha>/qa/contact.jpg`.
 
 ## Si algo falla

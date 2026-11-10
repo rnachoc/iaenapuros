@@ -21,3 +21,6 @@ models/
 # skills de terceros (se restauran con: npx skills experimental_install)
 .claude/skills/
 state/publish.lock
+# señal para The Brain y datos crudos de Instagram
+.brain/
+marketing/datos/

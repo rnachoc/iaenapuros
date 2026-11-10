@@ -8,12 +8,16 @@ import path from 'node:path';
 import { arg, readJSON, readLog, upsertLog, outDir, config, todayMadrid, P } from './lib/common.mjs';
 import { graph, ensureToken } from './lib/meta.mjs';
 import { publish } from './publish.mjs';
+import { writeBrainStatus } from './brain-status.mjs';
 
 // bloqueo: si dos ejecuciones coinciden (p. ej. una atrasada y la siguiente), solo una publica
 const LOCK = P('state', 'publish.lock');
 let locked = false;
 const done = (code, o) => {
   if (locked) fs.rmSync(LOCK, { force: true });
+  try {
+    writeBrainStatus();
+  } catch {}
   console.log('RESULTADO ' + JSON.stringify(o));
   process.exit(code);
 };
